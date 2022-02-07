@@ -1,0 +1,128 @@
+<html>
+	<head>
+	<meta http-equiv="Content-type" content="text/html;charset=utf-8">
+	<script type="text/javascript" src="xmlhttp.js"></script>
+	<script>
+		
+		async function callAwsLambdaFunction(){
+			
+		fetch('https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get',{
+			method:'GET'
+		})
+		.then(response => response.json())
+		.then((response) => {
+			//var data = eval(response);
+			var data = response;
+			console.dir(response);
+			var resultData ="";
+			//var resultData = data.body[0].message;//一つだけ値もってくる場合
+			for(var i=0; i<data.Items.length; i++)
+			    {if (data.Items[i].news_id !=null){
+				var inews = data.Items[i].news_id; // メッセージ
+                }else{inews=""};
+			    if (data.Items[i].timestamp !=null){
+                var itime = data.Items[i].timestamp; // Timestam
+                }else{itime=""};
+                if (data.Items[i].title !=null){
+                var ititle = data.Items[i].title; // title
+                }else{ititle=""};
+                if (data.Items[i].news_url !=null){
+                var iurl = data.Items[i].news_url; // URL
+                }else{iurl=""};   
+				if (data.Items[i].thumbnail_url !=null){
+                var ithumbnail = data.Items[i].thumbnail_url; //thumbnail
+                }else{ithumbnail=""}; 
+
+				if (data.Items[i].like_id !=null){
+				var ilike = data.Items[i].like_id.length; // like
+				}else{ilike =""};
+
+				//いいね済みかの判定   
+				iine = "「いいねを」押す"	
+				var log_id = document.getElementById("user_ID").value
+				var like_id = data.Items[i].like_id							
+				for(var k=0;k<ilike;k++){
+				if (like_id[k]==log_id){
+					iine = "いいね済み"
+				}};
+				//コメント
+				var isumcomment=[];//コメント初期化
+				if (data.Items[i].user_comment !=null){
+					for(var j=0;j<data.Items[i].user_comment.length;j++)
+					{	var icomment = data.Items[i].user_comment[j].user_comment; // commentのみ[1]のIDを表示させないため
+						isumcomment.push(icomment);//※commentを縦に並べ直す処理必要
+					}
+				}else{icomment = ""};              
+				resultData += 	"<a href ="+iurl+">"+ititle+"</a>" +"<br>" +
+								"<img src ="+ithumbnail+" width=200px>" +"<br>" +
+								itime + ":"+ inews + ":" + "<br>" +
+								"いいね:" + ilike + "<br>" +
+								"コメント:" + isumcomment + "<br>" +
+								"<button onclick='LikeButton()' id=" 
+								+inews+" value="+iine+">"+iine+"</div></button>" +
+								"<button onclick='CommentButton()' id=" +inews+
+								">コメント投稿</div></button><br>"
+													
+			}
+			document.getElementById("myDiv").innerHTML = resultData;//jsonデータの取得方法
+			
+		});
+	}
+	async function LikeButton(){
+		var article_id =event.target.id;
+		var log_id = document.getElementById("user_ID").value;
+		var like_flag = event.target.value;
+		const obj = {
+            		log_id:log_id,
+        			article_id:article_id,
+					like_flag:like_flag
+					};
+		const method ='POST';
+		const body = JSON.stringify(obj);
+		const headers ={'Content-Type':'application/json'};
+		fetch('https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get/-like_couunt',{
+			method,headers,body	}).then((res)=> res.json()).then(console.log).catch(console.error);
+		}
+			async function CommentButton(){
+		var article_id =event.target.id;
+		var log_id = document.getElementById("user_ID").value
+		var user_comment = document.getElementById("user_comment").value		
+		
+		const obj = {
+            		log_id:log_id,
+        			article_id:article_id,
+					user_comment:user_comment,
+					};
+		const method ='POST';
+		const body = JSON.stringify(obj);
+		const headers ={'Content-Type':'application/json'};
+		fetch(' https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get/-comment',{
+			method,headers,body	}).then((res)=> res.json()).then(console.log).catch(console.error);
+	
+		
+	}
+	
+		//function getId(event){// 自分のプロパティとしてidを取得						
+		//	var article_id =event.target.id;
+		//	document.getElementById("article_id").innerHTML = article_id;
+		//	console.dir(article_id);
+		//	}
+	
+	</script>
+		<title>Test</title>
+	</head>
+	<body>
+		
+		<h1>DX Terminal 練習</h1>
+		<p id="log_id">社員番号<!--7桁の番号に指定-->
+			<input type="number" id="user_ID" name="user_ID" size="10" minlength="7" maxlength="7" value="1234567">
+		</p>
+		<p>コメント<input type="text" id="user_comment" name="user_comment" size="20"></p>
+		<p><div id="myDiv"></div></p>
+		<button onclick="callAwsLambdaFunction()">ニュース表示（手動）</button>
+	
+	
+		
+	</body>
+</html>
+
