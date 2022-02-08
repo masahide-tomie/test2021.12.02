@@ -6,56 +6,53 @@
 		
 		async function callAwsLambdaFunction(){
 			
-		fetch('https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get',{
+		fetch('https://2if2h39b5g.execute-api.ap-northeast-1.amazonaws.com/dev/slack-news-hook',{
 			method:'GET'
 		})
 		.then(response => response.json())
 		.then((response) => {
-			//var data = eval(response);
-			var data = response;
+			var data = eval(response);
+			//var data = response;
 			console.dir(response);
+			console.dir(data[0]);
 			var resultData ="";
 			//var resultData = data.body[0].message;//一つだけ値もってくる場合
-			for(var i=0; i<data.Items.length; i++)
-			    {if (data.Items[i].news_id !=null){
-				var inews = data.Items[i].news_id; // メッセージ
+			for(var i=0; i<data.length; i++)
+			    {if (data[i].timestamp !=null){
+				var inews = data[i].timestamp; // Timestam兼ID
                 }else{inews=""};
-			    if (data.Items[i].timestamp !=null){
-                var itime = data.Items[i].timestamp; // Timestam
-                }else{itime=""};
-                if (data.Items[i].title !=null){
-                var ititle = data.Items[i].title; // title
+                if (data[i].title !=null){
+                var ititle = data[i].title; // title
                 }else{ititle=""};
-                if (data.Items[i].news_url !=null){
-                var iurl = data.Items[i].news_url; // URL
+                if (data[i].news_url !=null){
+                var iurl = data[i].news_url; // URL
                 }else{iurl=""};   
-				if (data.Items[i].thumbnail_url !=null){
-                var ithumbnail = data.Items[i].thumbnail_url; //thumbnail
+				if (data[i].thumbnail_url !=null){
+                var ithumbnail = data[i].thumbnail_url; //thumbnail
                 }else{ithumbnail=""}; 
-
-				if (data.Items[i].like_id !=null){
-				var ilike = data.Items[i].like_id.length; // like
+				if (data[i].like_id !=null){
+				var ilike = data[i].like_id.length; // like
 				}else{ilike =""};
 
 				//いいね済みかの判定   
 				iine = "「いいねを」押す"	
 				var log_id = document.getElementById("user_ID").value
-				var like_id = data.Items[i].like_id							
+				var like_id = data[i].like_id							
 				for(var k=0;k<ilike;k++){
 				if (like_id[k]==log_id){
 					iine = "いいね済み"
 				}};
 				//コメント
 				var isumcomment=[];//コメント初期化
-				if (data.Items[i].user_comment !=null){
-					for(var j=0;j<data.Items[i].user_comment.length;j++)
-					{	var icomment = data.Items[i].user_comment[j].user_comment; // commentのみ[1]のIDを表示させないため
+				if (data[i].comments !=null){
+					for(var j=0;j<data[i].comments.length;j++)
+					{	var icomment = data[i].comments[j].comment_main; // commentのみ[1]のIDを表示させないため
 						isumcomment.push(icomment);//※commentを縦に並べ直す処理必要
 					}
 				}else{icomment = ""};              
 				resultData += 	"<a href ="+iurl+">"+ititle+"</a>" +"<br>" +
 								"<img src ="+ithumbnail+" width=200px>" +"<br>" +
-								itime + ":"+ inews + ":" + "<br>" +
+								inews + ":"+ inews + ":" + "<br>" +
 								"いいね:" + ilike + "<br>" +
 								"コメント:" + isumcomment + "<br>" +
 								"<button onclick='LikeButton()' id=" 
@@ -80,10 +77,10 @@
 		const method ='POST';
 		const body = JSON.stringify(obj);
 		const headers ={'Content-Type':'application/json'};
-		fetch('https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get/-like_couunt',{
+		fetch('https://2if2h39b5g.execute-api.ap-northeast-1.amazonaws.com/dev/news-get/like_count',{
 			method,headers,body	}).then((res)=> res.json()).then(console.log).catch(console.error);
 		}
-			async function CommentButton(){
+	async function CommentButton(){
 		var article_id =event.target.id;
 		var log_id = document.getElementById("user_ID").value
 		var user_comment = document.getElementById("user_comment").value		
@@ -96,7 +93,7 @@
 		const method ='POST';
 		const body = JSON.stringify(obj);
 		const headers ={'Content-Type':'application/json'};
-		fetch(' https://4bzdn5kt4k.execute-api.ap-northeast-1.amazonaws.com/default/dx-website_slack-news-get/-comment',{
+		fetch('https://2if2h39b5g.execute-api.ap-northeast-1.amazonaws.com/dev/news-get/comment',{
 			method,headers,body	}).then((res)=> res.json()).then(console.log).catch(console.error);
 	
 		
